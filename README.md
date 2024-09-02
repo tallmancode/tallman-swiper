@@ -1,5 +1,55 @@
-# Vue 3 + Vite
+# Tallman Swiper
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Tallman Swiper replicates Tinder's swipe functionality using Vite and Vue.js. It features smooth swipe gestures and animations, allowing users to swipe left or right on profiles, similar to popular dating apps. This project showcases swipe interactions, state management, and a responsive UI.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Features
+
+- Swipe left or right on profiles
+- Smooth animations and transitions
+- Responsive design for mobile and desktop
+- State management for tracking swipes
+
+## Technologies Used
+
+- Vite
+- Vue.js
+- CSS animations
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (version X.X.X or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-username/tallman-swiper.git
+   
+2. Navigate into the project directory:
+
+   ```bash
+   cd tallman-swiper
+
+3. Install dependencies:
+
+    ```bash
+    npm install
+
+### Development
+Start the development server:
+    
+```bash
+npm run dev
+```
+Open http://localhost:5174 in your browser to see the application.
+
+### Build
+To build the project for production:
+
+```bash
+npm run build
+```

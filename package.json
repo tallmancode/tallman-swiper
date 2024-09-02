@@ -9,13 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "pexels": "^1.4.0",
     "vue": "^3.4.37"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.1.2",
-    "vite": "^5.4.1",
-    "typescript": "^5.0.2",
     "@types/node": "^20.9.2",
+    "@vitejs/plugin-vue": "^5.1.2",
+    "typescript": "^5.0.2",
+    "vite": "^5.4.1",
     "vue-tsc": "^2.1.4"
   }
 }

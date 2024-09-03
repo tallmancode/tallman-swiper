@@ -1,30 +1,82 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
+<script setup lang="ts">
+import Swiper from '~/components/Swiper.vue'
+import {ref} from "vue";
+import usePhotos from "~/composables/usePhotos";
+import {IPhoto} from "~/types";
+
+const photosList = ref<IPhoto[]>([])
+const hasError = ref<string | false>(false);
+
+const pexel = usePhotos()
+if(pexel){
+    pexel
+        .getPhotos()
+        .then((photos) => {
+            photosList.value = photos
+        }).catch((error) => {
+        hasError.value = error
+    })
+}else{
+    hasError.value = 'Something went wrong.'
+}
+
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+    <Swiper v-if="photosList.length > 0"
+            key-name="id"
+            :itemsList="photosList"
+            :max="3"
+            :offset-y="10"
+            allow-down
+            >
+        <template #default="scope">
+            <div class="item-wrapper">
+                <img :src="(scope.data as IPhoto).src" :alt="`Photo by ${(scope.data as IPhoto).credits.name}`">
+                <div class="footer">
+                    <div>
+                        Photo by {{(scope.data as IPhoto).credits.name}}
+                    </div>
+                    <div>
+                        <a :href="(scope.data as IPhoto).credits.link"  target="_blank">View on Pexel</a>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </Swiper>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+.item-wrapper{
+    height: 100%;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+.item-wrapper img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.item-wrapper .footer{
+    height: 80px;
+    width: 100%;
+    background-color: #fff;
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background-color: #20262e;
+    overflow: hidden;
 }
 </style>

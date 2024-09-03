@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import usePhotos from "./composables/usePhotos.ts";
-import Swiper from "./components/Swiper.vue";
+import Swiper from '~/components/Swiper.vue'
 import {ref} from "vue";
+import usePhotos from "~/composables/usePhotos";
+import {IPhoto} from "~/types";
 
-const queue = ref<{src: string}[]>([])
-const photosList = ref<string[]>([])
-const isLoading = ref(true)
+const photosList = ref<IPhoto[]>([])
 const hasError = ref<string | false>(false);
-const offset = ref(0)
 
 const pexel = usePhotos()
 if(pexel){
@@ -15,39 +13,70 @@ if(pexel){
         .getPhotos()
         .then((photos) => {
             photosList.value = photos
-            buildQueue();
-            isLoading.value = false
         }).catch((error) => {
-            hasError.value = error
-        })
+        hasError.value = error
+    })
 }else{
     hasError.value = 'Something went wrong.'
-    isLoading.value = false
 }
-
-const buildQueue = (count = 5, append = true) => {
-    const list = []
-    for (let i = 0; i < count; i++) {
-        list.push({src: photosList.value[offset.value]})
-        offset.value++
-    }
-    if (append) {
-        queue.value = queue.value.concat(list)
-    } else {
-        queue.value.unshift(...list)
-    }
-}
-
-
 
 </script>
 
 <template>
-    <div>
-        <Swiper v-model:queue="queue"/>
-    </div>
+    <Swiper v-if="photosList.length > 0"
+            key-name="id"
+            :itemsList="photosList"
+            :max="3"
+            :offset-y="10"
+            allow-down
+            >
+        <template #default="scope">
+            <div class="item-wrapper">
+                <img :src="(scope.data as IPhoto).src" :alt="`Photo by ${(scope.data as IPhoto).credits.name}`">
+                <div class="footer">
+                    <div>
+                        Photo by {{(scope.data as IPhoto).credits.name}}
+                    </div>
+                    <div>
+                        <a :href="(scope.data as IPhoto).credits.link"  target="_blank">View on Pexel</a>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </Swiper>
 </template>
 
-<style scoped>
+<style>
+.item-wrapper{
+    height: 100%;
+}
+.item-wrapper img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+.item-wrapper .footer{
+    height: 80px;
+    width: 100%;
+    background-color: #fff;
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
 
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background-color: #20262e;
+    overflow: hidden;
+}
 </style>

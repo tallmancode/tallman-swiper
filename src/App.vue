@@ -23,6 +23,10 @@ if(pexel){
 </script>
 
 <template>
+    <div class="header">
+        <img src="/logo.png" alt="">
+    </div>
+
     <Swiper v-if="photosList.length > 0"
             key-name="id"
             :itemsList="photosList"
@@ -47,6 +51,17 @@ if(pexel){
 </template>
 
 <style>
+.header{
+    padding-top: 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.header img{
+    width: auto;
+    max-height: 60px;
+}
 .item-wrapper{
     height: 100%;
 }

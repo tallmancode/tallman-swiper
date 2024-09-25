@@ -1,0 +1,32 @@
+name: Build and Deploy Nuxt.js App to Digital Ocean
+on:
+    push:
+        branches:
+            - main
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Set up Node.js
+              uses: actions/setup-node@v1
+              with:
+                  node-version: '18'
+            - name: Install Dependencies
+              run: npm install
+            - name: Build
+              run: npm run build
+            - name: Archive Production Artifacts
+              run: tar -czvf build.tar.gz ./dist
+            - name: Setup SSH Agent
+              uses: webfactory/ssh-agent@v0.5.2
+              with:
+                  ssh-private-key: ${{ secrets.DO_SSH_KEY }}
+            - name: Transfer Build Artifacts
+              run: scp -o StrictHostKeyChecking=no build.tar.gz ${{ secrets.DO_USERNAME }}@${{ secrets.DO_HOST }}:/path/to/deployment
+            - name: Deploy to Server
+              run: |
+                  ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USERNAME }}@${{ secrets.DO_HOST }} "
+                    cd /path/to/deployment
+                    tar -xzvf build.tar.gz -C /path/to/webroot
+                  "

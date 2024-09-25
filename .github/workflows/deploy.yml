@@ -1,4 +1,4 @@
-name: Build and Deploy Nuxt.js App to Digital Ocean
+name: Build and Deploy
 on:
     push:
         branches:
@@ -21,12 +21,12 @@ jobs:
             - name: Setup SSH Agent
               uses: webfactory/ssh-agent@v0.5.2
               with:
-                  ssh-private-key: ${{ secrets.DO_SSH_KEY }}
+                  ssh-private-key: ${{ secrets.SSH_KEY }}
             - name: Transfer Build Artifacts
-              run: scp -o StrictHostKeyChecking=no build.tar.gz ${{ secrets.DO_USERNAME }}@${{ secrets.DO_HOST }}:/path/to/deployment
+              run: scp -o StrictHostKeyChecking=no build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/www/wwwroot/swiper
             - name: Deploy to Server
               run: |
-                  ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USERNAME }}@${{ secrets.DO_HOST }} "
-                    cd /path/to/deployment
-                    tar -xzvf build.tar.gz -C /path/to/webroot
+                  ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
+                    cd /www/wwwroot/swiper
+                    tar -xzvf build.tar.gz -C /www/wwwroot/swiper
                   "

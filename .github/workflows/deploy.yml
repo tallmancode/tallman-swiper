@@ -17,7 +17,7 @@ jobs:
             - name: Build
               run: npm run build
               env:
-                  VITE_INTERNAL: ${{ secrets.VITE_PEXEL_KEY }}
+                  VITE_PEXEL_KEY: ${{ secrets.VITE_PEXEL_KEY }}
             - name: Archive Production Artifacts
               run: tar -czvf build.tar.gz ./dist
             - name: Setup SSH Agent

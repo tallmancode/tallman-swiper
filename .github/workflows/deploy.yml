@@ -29,8 +29,8 @@ jobs:
             - name: Deploy to Server
               run: |
                   ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
-                    rm -R dist
                     cd /www/wwwroot/swiper
+                    rm -R dist
                     tar -xzvf build.tar.gz -C /www/wwwroot/swiper
                     rm build.tar.gz
                   "

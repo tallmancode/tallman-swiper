@@ -29,10 +29,9 @@ jobs:
             - name: Deploy to Server
               run: |
                   ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
-                    sudo pm2 stop vite-app
                     cd /www/wwwroot/swiper
                     sudo rm -R dist
                     tar -xzvf build.tar.gz -C /www/wwwroot/swiper
                     rm build.tar.gz
-                    sudo pm2 start vite-app
+                    sudo pm2 restart swiper-app --update-env
                   "

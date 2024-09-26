@@ -16,6 +16,8 @@ jobs:
               run: npm install
             - name: Build
               run: npm run build
+              env:
+                  VITE_PEXEL_KEY: ${{ secrets.VITE_PEXEL_KEY }}
             - name: Archive Production Artifacts
               run: tar -czvf build.tar.gz ./dist
             - name: Setup SSH Agent
@@ -28,5 +30,8 @@ jobs:
               run: |
                   ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
                     cd /www/wwwroot/swiper
+                    sudo rm -R dist
                     tar -xzvf build.tar.gz -C /www/wwwroot/swiper
+                    rm build.tar.gz
+                    sudo pm2 restart swiper-app --update-env
                   "

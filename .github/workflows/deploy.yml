@@ -31,4 +31,5 @@ jobs:
                   ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
                     cd /www/wwwroot/swiper
                     tar -xzvf build.tar.gz -C /www/wwwroot/swiper
+                    rm build.tar.gz
                   "

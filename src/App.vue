@@ -74,6 +74,7 @@ if(pexel){
 .item-wrapper .footer{
     height: 80px;
     width: 100%;
+    color: #242424;
     background-color: #fff;
     position: absolute;
     bottom: 0;
@@ -82,6 +83,10 @@ if(pexel){
     align-items: center;
     justify-content: center;
     z-index: 10;
+}
+
+.item-wrapper .footer a{
+    color: #f08c0b;
 }
 
 html,

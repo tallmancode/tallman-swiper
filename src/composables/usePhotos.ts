@@ -34,6 +34,7 @@ const usePhoto = (): { getPhotos: () => Promise<IPhoto[]> } | undefined => {
                         resolve(photos)
                     } else if ('error' in res) {
                         reject(res.error)
+                        return
                     }
 
                     reject('Something went wrong. Please try again later.')

@@ -1,21 +1,8 @@
 <script setup lang="ts">
-import {ISwiperState} from "~/utils/swiperState";
 import {STATUS_CONSTANTS} from '~/utils/statusConstants'
 import {computed, onBeforeMount, onMounted, Ref, ref, watch} from "vue";
-import {IPhoto} from "~/types";
-
-interface ISwiperCardProps {
-    tinderMounted: boolean;
-    index: number;
-    ready: boolean;
-    swiperState: ISwiperState;
-    ratio: number;
-    rewind: boolean | number;
-    scaleStep: number;
-    offsetY: number;
-    offsetUnit: string;
-    item: IPhoto
-}
+import type {ISwiperCardProps} from "~/types";
+import {CARD_STACK, ANIMATION_DURATION, TRANSITION_TIMING, ROTATION} from "~/utils/animationConstants";
 
 const props = withDefaults(defineProps<ISwiperCardProps>(), {
     tinderMounted: false,
@@ -48,14 +35,14 @@ const normalStyle = computed(() => {
         return {
             opacity: 1,
             transform: `translate3d(0,0,0) rotate(0) scale3d(1,1,1)`,
-            transition: `all 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275), z-index 0s`
+            transition: `all ${ANIMATION_DURATION.NORMAL}ms ${TRANSITION_TIMING.SMOOTH}, z-index 0s`
         }
     }
     return {
         opacity: props.ready ? 0 : 1,
         transform: getTransform(),
-        transition: `all 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275) ${
-            (scopedRewind.value && typeof scopedRewind.value === 'number') ? scopedRewind.value * 80 : 0
+        transition: `all ${ANIMATION_DURATION.NORMAL}ms ${TRANSITION_TIMING.SMOOTH} ${
+            (scopedRewind.value && typeof scopedRewind.value === 'number') ? scopedRewind.value * CARD_STACK.REWIND_DELAY_MULTIPLIER : 0
         }ms, z-index 0s`
     }
 })
@@ -66,7 +53,7 @@ const movingStyle = computed(() => {
         const {start, move, startPoint} = props.swiperState
         const x = move.x - start.x || 0
         const y = move.y - start.y || 0
-        const rotate = 10 * props.ratio * startPoint
+        const rotate = ROTATION.BASE_MULTIPLIER * props.ratio * startPoint
         style['transform'] = `translate3d(${x}px,${y}px,0) rotate(${rotate}deg)`
     } else {
         let ratio = Math.abs(props.ratio)

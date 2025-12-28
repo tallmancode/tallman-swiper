@@ -8,11 +8,11 @@ jobs:
     build-and-deploy:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - name: Set up Node.js
-              uses: actions/setup-node@v1
+              uses: actions/setup-node@v4
               with:
-                  node-version: '18'
+                  node-version: '22.19'
             - name: Install Dependencies
               run: npm install
             - name: Build
@@ -20,18 +20,52 @@ jobs:
               env:
                   VITE_PEXEL_KEY: ${{ secrets.VITE_PEXEL_KEY }}
             - name: Archive Production Artifacts
-              run: tar -czvf build.tar.gz ./dist
+              run: tar -czvf build.tar.gz ./dist ./ecosystem.config.cjs
             - name: Setup SSH Agent
-              uses: webfactory/ssh-agent@v0.5.2
+              uses: webfactory/ssh-agent@v0.9.0
               with:
                   ssh-private-key: ${{ secrets.SSH_KEY }}
             - name: Transfer Build Artifacts
               run: scp -o StrictHostKeyChecking=no build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/www/wwwroot/swiper.tallmancode.co.za
             - name: Deploy to Server
               run: |
+                  set -e
                   ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
+                    set -e
                     cd /www/wwwroot/swiper.tallmancode.co.za
-                    rm -R dist
+                    
+                    # Verify PM2 is installed
+                    if ! command -v pm2 &> /dev/null; then
+                      echo 'Error: PM2 is not installed'
+                      exit 1
+                    fi
+                    
+                    # Remove old dist folder and extract new build
+                    rm -rf dist
                     tar -xzvf build.tar.gz -C /www/wwwroot/swiper.tallmancode.co.za
                     rm build.tar.gz
+                    
+                    # Stop existing PM2 process if running
+                    pm2 stop swiper || true
+                    
+                    # Start or reload PM2 process
+                    if pm2 list | grep -q swiper; then
+                      pm2 reload ecosystem.config.cjs --update-env
+                    else
+                      pm2 start ecosystem.config.cjs
+                    fi
+                    
+                    # Save PM2 configuration
+                    pm2 save
+                    
+                    # Wait for app to start
+                    sleep 5
+                    
+                    # Health check
+                    if curl -f http://localhost:3000 > /dev/null 2>&1; then
+                      echo 'Health check passed: App is responding'
+                    else
+                      echo 'Health check failed: App is not responding'
+                      exit 1
+                    fi
                   "

@@ -162,7 +162,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
 
 
-const onSubmit = ({item}: {item: IPhoto}) => {
+const onSubmit = (_params: {type?: string, key?: string | number, item?: IPhoto}) => {
     if (queue.value.length < 3) {
         mock()
     }

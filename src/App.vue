@@ -24,6 +24,10 @@ if (pexel) {
     isLoading.value = false
 }
 
+const reloadPage = () => {
+    window.location.reload()
+}
+
 </script>
 
 <template>
@@ -40,7 +44,7 @@ if (pexel) {
         <div class="error-icon">⚠️</div>
         <h2>Oops! Something went wrong</h2>
         <p class="error-message">{{ hasError.message }}</p>
-        <button class="retry-button" @click="() => window.location.reload()">
+        <button class="retry-button" @click="reloadPage">
             Retry
         </button>
     </div>

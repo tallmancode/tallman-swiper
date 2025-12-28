@@ -1,9 +1,9 @@
-import {ISwiperConfig} from "~/utils/swiperConfig.ts";
 import {ComputedRef, Ref} from "vue";
+import type {ISwiperConfig, ISwiperState} from "~/types";
 import {STATUS_CONSTANTS} from '~/utils/statusConstants.ts'
-import {initState, ISwiperState} from "~/utils/swiperState.ts";
+import {initState} from "~/utils/swiperState.ts";
 
-const useSwiperTouchEvents = (swiperConfig: Ref<ISwiperConfig>, swiperState: Ref<ISwiperState>, direction: ComputedRef<string|undefined>, shiftCard: Function) => {
+const useSwiperTouchEvents = (swiperConfig: Ref<ISwiperConfig>, swiperState: Ref<ISwiperState>, direction: ComputedRef<string | undefined>, shiftCard: Function) => {
     const start = (e: TouchEvent | MouseEvent) => {
         if (
             swiperState.value.touchId !== null ||

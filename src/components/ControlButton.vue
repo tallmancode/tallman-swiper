@@ -1,10 +1,10 @@
 <script setup lang="ts">
-defineProps<{icon: string, color: string}>()
+defineProps<{icon: string, color: string, label: string}>()
 </script>
 
 <template>
-<button class="control-button" type="button" :style="{backgroundColor: color}">
-    <svg :viewBox="'0 0 24 24'">
+<button class="control-button" type="button" :style="{backgroundColor: color}" :aria-label="label">
+    <svg :viewBox="'0 0 24 24'" aria-hidden="true">
         <path :d="icon"></path>
     </svg>
 </button>
@@ -29,6 +29,13 @@ defineProps<{icon: string, color: string}>()
 }
 .control-button:hover{
     opacity: 0.75;
+}
+.control-button:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+.control-button:active {
+    transform: scale(0.95);
 }
 .control-button svg{
     fill: #ffffff;

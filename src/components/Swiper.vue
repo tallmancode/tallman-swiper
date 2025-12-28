@@ -2,37 +2,23 @@
 import SwiperCard from "./SwiperCard.vue";
 import {swiperConfig} from "~/utils/swiperConfig.ts";
 import useSwiperTransitions from "~/utils/swiperTransitions.ts";
-import {initState, ISwiperState} from '~/utils/swiperState.ts'
-import {computed, onBeforeMount, onMounted, ref, Ref} from "vue";
+import {initState} from '~/utils/swiperState.ts'
+import {computed, onBeforeMount, onBeforeUnmount, onMounted, ref, Ref} from "vue";
 import useSwiperTouchEvents from "~/utils/swiperTouchEvents.ts";
 import useSwiperQueue from "~/utils/swiperQueue.ts";
 import useSwiperCore from "~/utils/swiperCore.ts";
-import {IPhoto} from "~/types";
 import {mdiClose, mdiHeartOutline, mdiStarPlusOutline, mdiUndo} from "@mdi/js";
 import ControlButton from "~/components/ControlButton.vue";
-
-export interface ISwiperProps {
-    allowSuper?: boolean
-    allowDown?: boolean,
-    keyName: string,
-    pointerThreshold?: number,
-    superThreshold?: number,
-    downThreshold?: number,
-    sync?: boolean,
-    max?: number,
-    scaleStep?: number,
-    offsetY?: number,
-    offsetUnit?: string
-    itemsList : IPhoto[]
-}
+import type {ISwiperProps, ISwiperState, IPhoto} from "~/types";
+import {SWIPE_THRESHOLDS} from "~/utils/animationConstants";
 
 const props = withDefaults(defineProps<ISwiperProps>(), {
     allowSuper: true,
     allowDown: false,
     keyName: 'key',
-    pointerThreshold: 0.5,
-    superThreshold: 0.5,
-    downThreshold: 0.5,
+    pointerThreshold: SWIPE_THRESHOLDS.POINTER_RATIO,
+    superThreshold: SWIPE_THRESHOLDS.SUPER_RATIO,
+    downThreshold: SWIPE_THRESHOLDS.DOWN_RATIO,
     sync: false,
     max: 3,
     scaleStep: 0.05,
@@ -45,8 +31,7 @@ const queue = ref<IPhoto[]>([])
 
 const swiperState: Ref<ISwiperState> = ref(initState())
 const isMounted = ref(false)
-const history = ref<IPhoto[]>([])
-const list = ref([])
+const list = ref<IPhoto[]>([])
 const offset = ref(0)
 const root: Ref<HTMLDivElement | null> = ref(null)
 const resizeTimer: Ref<NodeJS.Timeout | null> = ref(null)
@@ -57,7 +42,7 @@ const ratio = computed(() => {
     if (swiperConfig.value.size.width) {
         const {start, move} = swiperState.value
         const x = move.x - start.x || 0
-        return x / (swiperConfig.value.size.width * 0.5)
+        return x / (swiperConfig.value.size.width * SWIPE_THRESHOLDS.WIDTH_MULTIPLIER)
     }
     return 0
 })
@@ -103,16 +88,17 @@ const resetState = () => {
 }
 
 const mock = (count = 5, append = true) => {
-    const list = []
+    const newItems: IPhoto[] = []
     for (let i = 0; i < count; i++) {
-        // @ts-ignore
-        list.push({...props.itemsList[offset.value]})
-        offset.value++
+        if (offset.value < props.itemsList.length) {
+            newItems.push({...props.itemsList[offset.value]})
+            offset.value++
+        }
     }
     if (append) {
-        queue.value = queue.value.concat(list)
+        queue.value = queue.value.concat(newItems)
     } else {
-        queue.value.unshift(...list)
+        queue.value.unshift(...newItems)
     }
 }
 
@@ -132,24 +118,60 @@ onMounted(() => {
         width: root.value.offsetWidth,
         height: root.value.offsetHeight
     }
-    window.onresize = getSize
+    window.addEventListener('resize', getSize)
+    window.addEventListener('keydown', handleKeyDown)
     isMounted.value = true
 })
 
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', getSize)
+    window.removeEventListener('keydown', handleKeyDown)
+    if (resizeTimer.value) {
+        clearTimeout(resizeTimer.value)
+    }
+})
+
+const handleKeyDown = (e: KeyboardEvent) => {
+    // Arrow keys and keyboard shortcuts for accessibility
+    switch(e.key) {
+        case 'ArrowLeft':
+            e.preventDefault()
+            decide('nope')
+            break
+        case 'ArrowRight':
+            e.preventDefault()
+            decide('like')
+            break
+        case 'ArrowUp':
+            e.preventDefault()
+            decide('super')
+            break
+        case 'ArrowDown':
+            e.preventDefault()
+            decide('down')
+            break
+        case 'z':
+        case 'Z':
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault()
+                decide('rewind')
+            }
+            break
+    }
+}
 
 
-const onSubmit = ({item} : {item: IPhoto}) => {
+
+const onSubmit = ({item}: {item: IPhoto}) => {
     if (queue.value.length < 3) {
         mock()
     }
-    history.value.push(item)
-    // @ts-ignore
     const newKeys = queue.value.map(item => item[props.keyName])
     const oldKeys = list.value.map(item => item[props.keyName])
     diff(newKeys, oldKeys)
 }
-// @ts-ignore
-const {shiftCard, decide, rewind,} = useSwiperCore(swiperConfig, props, swiperState, onSubmit, queue)
+
+const {shiftCard, decide, rewind} = useSwiperCore(swiperConfig, props, swiperState, onSubmit, queue)
 const {beforeEnter, leave} = useSwiperTransitions(swiperConfig, props, swiperState)
 const {diff} = useSwiperQueue(swiperConfig, props, swiperState, list, queue)
 const {start, move,end } = useSwiperTouchEvents(swiperConfig, swiperState, direction, shiftCard)
@@ -200,10 +222,10 @@ defineExpose({
             </transition-group>
         </div>
         <div class="control-buttons">
-            <ControlButton color="#33a8b2" :icon="mdiUndo" @click="decide('rewind')"/>
-            <ControlButton color="#cbae45" :icon="mdiClose" @click="decide('nope')"/>
-            <ControlButton color="#7147ed" :icon="mdiStarPlusOutline" @click="decide('super')"/>
-            <ControlButton color="#fc538d" :icon="mdiHeartOutline" @click="decide('like')"/>
+            <ControlButton color="#33a8b2" :icon="mdiUndo" label="Undo last swipe" @click="decide('rewind')"/>
+            <ControlButton color="#cbae45" :icon="mdiClose" label="Reject" @click="decide('nope')"/>
+            <ControlButton color="#7147ed" :icon="mdiStarPlusOutline" label="Super like" @click="decide('super')"/>
+            <ControlButton color="#fc538d" :icon="mdiHeartOutline" label="Like" @click="decide('like')"/>
         </div>
     </div>
 

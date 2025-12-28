@@ -1,33 +1,18 @@
 import {Ref, ref} from "vue";
-
-export interface ISwiperSize  {
-    top: number,
-    width: number,
-    height: number
-}
-
-export interface ISwiperConfig {
-    leavedCount: number,
-    hideIndex: number,
-    lastHideIndex: number,
-    hidingKeys: string[],
-    rewindKeys: string[],
-    leavingKeys: string [],
-    size: ISwiperSize,
-    onceRewindCount: number
-}
+import type {ISwiperConfig} from "~/types";
+import {CARD_STACK} from "~/utils/animationConstants";
 
 export const swiperConfig: Ref<ISwiperConfig> = ref({
     leavedCount: 0,
-    hideIndex: 50,
-    lastHideIndex: 50,
+    hideIndex: CARD_STACK.INITIAL_HIDE_INDEX,
+    lastHideIndex: CARD_STACK.INITIAL_HIDE_INDEX,
     hidingKeys: [],
     rewindKeys: [],
-    leavingKeys:[],
+    leavingKeys: [],
     size: {
         top: 0,
         width: 0,
         height: 0
     },
-    onceRewindCount:0
+    onceRewindCount: 0
 })

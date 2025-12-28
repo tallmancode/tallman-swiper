@@ -1,23 +1,12 @@
-export const initState = (revert?: boolean)  => <ISwiperState> ({
+import type {ISwiperState} from "~/types";
+
+export const initState = (revert?: boolean): ISwiperState => ({
     status: revert ? 3 : 0,
     touchId: null,
-    start: {},
-    move: {},
+    start: {x: 0, y: 0},
+    move: {x: 0, y: 0},
     startPoint: 1,
     result: null
 })
 
-export interface ISwiperState {
-    status: number,
-    touchId: string | number | null,
-    start: {
-        x: number,
-        y: number
-    },
-    move: {
-        x: number,
-        y: number
-    },
-    startPoint: number,
-    result: null | string | number
-}
+export type {ISwiperState}

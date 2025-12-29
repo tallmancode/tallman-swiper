@@ -26,13 +26,28 @@ jobs:
               with:
                   ssh-private-key: ${{ secrets.SSH_KEY }}
             - name: Transfer Build Artifacts
-              run: scp -o StrictHostKeyChecking=no build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/www/wwwroot/swiper.tallmancode.co.za
+              run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.SERVER_PATH }}/build.tar.gz
             - name: Deploy to Server
               run: |
                   set -e
-                  ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
+                  ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
                     set -e
-                    cd /www/wwwroot/swiper.tallmancode.co.za
+                    SERVER_PATH='${{ secrets.SERVER_PATH }}'
+                    
+                    # Verify server path exists
+                    if [ ! -d \"\$SERVER_PATH\" ]; then
+                      echo \"Error: Server path \$SERVER_PATH does not exist\"
+                      exit 1
+                    fi
+                    
+                    # Change to server path
+                    cd \"\$SERVER_PATH\" || { echo \"Error: Failed to change to \$SERVER_PATH\"; exit 1; }
+                    
+                    # Verify build.tar.gz was transferred
+                    if [ ! -f \"build.tar.gz\" ]; then
+                      echo \"Error: build.tar.gz not found in \$SERVER_PATH\"
+                      exit 1
+                    fi
                     
                     # Verify PM2 is installed
                     if ! command -v pm2 &> /dev/null; then
@@ -41,14 +56,25 @@ jobs:
                     fi
                     
                     # Remove old dist folder and extract new build
-                    rm -rf dist
-                    tar -xzvf build.tar.gz -C /www/wwwroot/swiper.tallmancode.co.za
+                    echo 'Removing old dist folder...'
+                    rm -rf dist || true
+                    echo 'Extracting new build...'
+                    tar -xzvf build.tar.gz
+                    echo 'Cleaning up build archive...'
                     rm build.tar.gz
                     
+                    # Verify ecosystem.config.cjs exists
+                    if [ ! -f \"ecosystem.config.cjs\" ]; then
+                      echo 'Error: ecosystem.config.cjs not found after extraction'
+                      exit 1
+                    fi
+                    
                     # Stop existing PM2 process if running
+                    echo 'Stopping existing PM2 process...'
                     pm2 stop swiper || true
                     
                     # Start or reload PM2 process
+                    echo 'Starting/Reloading PM2 process...'
                     if pm2 list | grep -q swiper; then
                       pm2 reload ecosystem.config.cjs --update-env
                     else
@@ -59,13 +85,17 @@ jobs:
                     pm2 save
                     
                     # Wait for app to start
+                    echo 'Waiting for app to start...'
                     sleep 5
                     
                     # Health check
-                    if curl -f http://localhost:3000 > /dev/null 2>&1; then
+                    echo 'Performing health check...'
+                    if curl -f http://localhost:5191 > /dev/null 2>&1; then
                       echo 'Health check passed: App is responding'
                     else
                       echo 'Health check failed: App is not responding'
                       exit 1
                     fi
+                    
+                    echo 'Deployment completed successfully!'
                   "

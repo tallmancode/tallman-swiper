@@ -4,7 +4,7 @@ module.exports = {
     script: 'serve',
     env: {
       PM2_SERVE_PATH: '/www/wwwroot/swiper.tallmancode.co.za/dist',
-      PM2_SERVE_PORT: 3000,
+      PM2_SERVE_PORT: 5191,
       PM2_SERVE_SPA: 'true',
       PM2_SERVE_HOMEPAGE: '/index.html'
     },
@@ -17,4 +17,6 @@ module.exports = {
     max_memory_restart: '1G'
   }]
 }
+
+
 

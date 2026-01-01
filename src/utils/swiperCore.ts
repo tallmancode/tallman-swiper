@@ -1,11 +1,8 @@
-import {ISwiperConfig} from "~/utils/swiperConfig.ts";
 import {Ref} from "vue";
-import {ISwiperProps} from "~/components/Swiper.vue";
+import type {ISwiperConfig, ISwiperProps, ISwiperState, IPhoto} from "~/types";
 import {STATUS_CONSTANTS} from '~/utils/statusConstants.ts'
-import {ISwiperState} from "~/utils/swiperState.ts";
-import {IPhoto} from "~/types";
 
-const useSwiperCore = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperProps, swiperState: Ref<ISwiperState>, onSubmit: Function, queue: Ref<{ [key: string]: IPhoto }[]>) => {
+const useSwiperCore = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperProps, swiperState: Ref<ISwiperState>, onSubmit: Function, queue: Ref<IPhoto[]>) => {
     const shiftCard = (type: string) => {
         swiperState.value.status = STATUS_CONSTANTS.LEAVING
         swiperState.value.result = type
@@ -14,14 +11,14 @@ const useSwiperCore = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperPro
         submitDecide(type, activeItem)
     }
 
-    const rewind = (list: { [key: string]: IPhoto }[]) => {
+    const rewind = (list: IPhoto[]) => {
         for (const item of list) {
             swiperConfig.value.rewindKeys.push(item[swiperProps.keyName] + '')
         }
         queue.value = [...list, ...queue.value]
     }
 
-    const submitDecide = (type: string, item: any) => {
+    const submitDecide = (type: string, item: IPhoto) => {
         onSubmit({type, key: item[swiperProps.keyName], item})
     }
     const decide = (type: string) => {

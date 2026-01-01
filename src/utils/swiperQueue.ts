@@ -1,23 +1,20 @@
-import {ISwiperConfig} from "~/utils/swiperConfig.ts";
 import {Ref} from "vue";
-import {ISwiperProps} from "~/components/Swiper.vue";
+import type {ISwiperConfig, ISwiperProps, ISwiperState, IPhoto} from "~/types";
 import {STATUS_CONSTANTS} from '~/utils/statusConstants.ts'
-import {ISwiperState} from "~/utils/swiperState.ts";
 
-const difference = (array: any[], exclude: any[]) => {
-    const result = []
+const difference = (array: string[], exclude: string[]): string[] => {
+    const result: string[] = []
     for (let i = 0; i < array.length; i++) {
         if (exclude.indexOf(array[i]) > -1) {
             break
         }
-        // @ts-ignore
         result.push(array[i])
     }
     return result
 }
 
-const useSwiperQueue = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperProps, swiperState: Ref<ISwiperState>, listItems: Ref<any[]>, queue:  Ref<any[]>) => {
-    const diff = (list: any[], old: any[]) => {
+const useSwiperQueue = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperProps, swiperState: Ref<ISwiperState>, listItems: Ref<IPhoto[]>, queue: Ref<IPhoto[]>) => {
+    const diff = (list: string[], old: string[]) => {
         const keyName = swiperProps.keyName
         const add = difference(list, old)
         let onceRewindCount = 0

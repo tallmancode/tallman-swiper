@@ -2,7 +2,13 @@ export interface IPhoto {
     id: string,
     src: string,
     credits: { name: string, link: string }
+    $vtKey?: string
+}
 
+export interface ISwiperSize {
+    top: number,
+    width: number,
+    height: number
 }
 
 export interface ISwiperConfig {
@@ -11,7 +17,7 @@ export interface ISwiperConfig {
     lastHideIndex: number,
     hidingKeys: string[],
     rewindKeys: string[],
-    leavingKeys: string [],
+    leavingKeys: string[],
     size: ISwiperSize,
     onceRewindCount: number
 }
@@ -19,8 +25,7 @@ export interface ISwiperConfig {
 export interface ISwiperProps {
     allowSuper?: boolean
     allowDown?: boolean,
-    photoList : IPhoto[],
-    keyName?: string,
+    keyName: string,
     pointerThreshold?: number,
     superThreshold?: number,
     downThreshold?: number,
@@ -29,6 +34,7 @@ export interface ISwiperProps {
     scaleStep?: number,
     offsetY?: number,
     offsetUnit?: string
+    itemsList: IPhoto[]
 }
 
 export interface ISwiperState {
@@ -45,3 +51,17 @@ export interface ISwiperState {
     startPoint: number,
     result: null | string | number
 }
+
+export interface ISwiperCardProps {
+    tinderMounted: boolean;
+    index: number;
+    ready: boolean;
+    swiperState: ISwiperState;
+    ratio: number;
+    rewind: boolean | number;
+    scaleStep: number;
+    offsetY: number;
+    offsetUnit: string;
+    item: IPhoto
+}
+

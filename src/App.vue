@@ -31,48 +31,62 @@ const reloadPage = () => {
 </script>
 
 <template>
-    <div class="header">
-        <img src="/logo.png" alt="Tallman Swiper Logo">
-    </div>
+    <header class="header">
+        <h1 class="visually-hidden">Tallman Swiper - Vue 3 Card Swiper</h1>
+        <img src="/logo.png" alt="Tallman Swiper - Advanced Card Swipe Component Logo">
+    </header>
 
-    <div v-if="isLoading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Loading photos...</p>
-    </div>
+    <main id="main-content">
+        <div v-if="isLoading" class="loading-container">
+            <div class="spinner"></div>
+            <p>Loading photos...</p>
+        </div>
 
-    <div v-else-if="hasError" class="error-container">
-        <div class="error-icon">⚠️</div>
-        <h2>Oops! Something went wrong</h2>
-        <p class="error-message">{{ hasError.message }}</p>
-        <button class="retry-button" @click="reloadPage">
-            Retry
-        </button>
-    </div>
+        <div v-else-if="hasError" class="error-container">
+            <div class="error-icon" aria-hidden="true">⚠️</div>
+            <h2>Oops! Something went wrong</h2>
+            <p class="error-message">{{ hasError.message }}</p>
+            <button class="retry-button" @click="reloadPage">
+                Retry
+            </button>
+        </div>
 
-    <Swiper v-else-if="photosList.length > 0"
-            key-name="id"
-            :itemsList="photosList"
-            :max="3"
-            :offset-y="10"
-            allow-down
-            >
-        <template #default="scope">
-            <div class="item-wrapper">
-                <img :src="(scope.data as IPhoto).src" :alt="`Photo by ${(scope.data as IPhoto).credits.name}`">
-                <div class="footer">
-                    <div>
-                        Photo by {{(scope.data as IPhoto).credits.name}}
+        <Swiper v-else-if="photosList.length > 0"
+                key-name="id"
+                :itemsList="photosList"
+                :max="3"
+                :offset-y="10"
+                allow-down
+                >
+            <template #default="scope">
+                <article class="item-wrapper">
+                    <img :src="(scope.data as IPhoto).src" :alt="`Dynamic photo by ${(scope.data as IPhoto).credits.name}`">
+                    <div class="footer">
+                        <div>
+                            Photo by {{(scope.data as IPhoto).credits.name}}
+                        </div>
+                        <div>
+                            <a :href="(scope.data as IPhoto).credits.link"  target="_blank" rel="noopener noreferrer">View on Pexel</a>
+                        </div>
                     </div>
-                    <div>
-                        <a :href="(scope.data as IPhoto).credits.link"  target="_blank" rel="noopener noreferrer">View on Pexel</a>
-                    </div>
-                </div>
-            </div>
-        </template>
-    </Swiper>
+                </article>
+            </template>
+        </Swiper>
+    </main>
 </template>
 
 <style>
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
 .header{
     padding-top: 8px;
     width: 100%;

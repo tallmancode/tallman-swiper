@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import Swiper from '~/components/Swiper.vue'
-import {ref} from "vue";
+import {ref, onMounted, onUnmounted} from "vue";
 import usePhotos from "~/composables/usePhotos";
 import type {IPhoto} from "~/types";
 
 const photosList = ref<IPhoto[]>([])
 const hasError = ref<Error | null>(null);
 const isLoading = ref<boolean>(true);
+const isMenuOpen = ref<boolean>(false);
 
 const pexel = usePhotos()
 if (pexel) {
@@ -28,13 +29,100 @@ const reloadPage = () => {
     window.location.reload()
 }
 
+const toggleMenu = () => {
+    isMenuOpen.value = !isMenuOpen.value
+}
+
+const closeMenu = () => {
+    isMenuOpen.value = false
+}
+
+const handleEscapeKey = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && isMenuOpen.value) {
+        closeMenu()
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('keydown', handleEscapeKey)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('keydown', handleEscapeKey)
+})
+
 </script>
 
 <template>
     <header class="header">
+        <button 
+            class="hamburger-button" 
+            @click="toggleMenu" 
+            :aria-label="isMenuOpen ? 'Close menu' : 'Open menu'"
+            :aria-expanded="isMenuOpen"
+        >
+            <span class="hamburger-line" :class="{ 'open': isMenuOpen }"></span>
+            <span class="hamburger-line" :class="{ 'open': isMenuOpen }"></span>
+            <span class="hamburger-line" :class="{ 'open': isMenuOpen }"></span>
+        </button>
         <h1 class="visually-hidden">Tallman Swiper - Vue 3 Card Swiper</h1>
         <img src="/logo.png" alt="Tallman Swiper - Advanced Card Swipe Component Logo">
     </header>
+
+    <div 
+        v-if="isMenuOpen" 
+        class="menu-overlay" 
+        @click="closeMenu"
+        aria-hidden="true"
+    ></div>
+
+    <nav 
+        class="mobile-menu" 
+        :class="{ 'open': isMenuOpen }"
+        role="navigation"
+        aria-label="Mobile navigation"
+        :aria-hidden="!isMenuOpen"
+    >
+        <div>
+            <div class="menu-header">
+                <h2 class="visually-hidden">About</h2>
+                <a href="https://tallmancode.co.za" target="_blank" rel="noopener noreferrer" title="Visit TallmanCode Portfolio">
+                    <img src="/tallmancode-logo.svg" alt="TallmanCode - Software Developer Logo">
+                </a>
+                <button
+                    class="close-button"
+                    @click="closeMenu"
+                    aria-label="Close menu"
+                >
+                    <span class="close-icon">&times;</span>
+                </button>
+            </div>
+            <div class="menu-body">
+                <p>
+                    <strong>Tallman Swiper</strong> is a production-ready, <strong>open-source Vue 3 Tinder-style component</strong>. This <strong>swipe library</strong> replicates the intuitive interactions found in popular discovery apps, built with the Composition API and TypeScript.
+                </p>
+                <ul>
+                    <li>Dynamic <strong>Pexels API</strong> photo integration</li>
+                    <li>Advanced <strong>swipe animations</strong> and gestures</li>
+                    <li>Fully <strong>responsive design</strong> for mobile and desktop</li>
+                    <li>WCAG-compliant <strong>accessibility features</strong></li>
+                    <li>High-performance <strong>state management</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="menu-footer">
+            <a href="https://tallmancode.co.za" target="_blank" rel="noopener noreferrer" title="Visit TallmanCode Portfolio">
+                <img src="/tallmancode-circle-logo.svg"  alt="TallmanCode Portfolio"/>
+            </a>
+            <a href="https://github.com/tallmancode" target="_blank" rel="noopener noreferrer" title="View Project on GitHub">
+                <img src="/github-logo.svg"  alt="GitHub Repository"/>
+            </a>
+            <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" title="Photos provided by Pexels">
+                <img src="/pexels-logo.svg"  alt="Pexels Photography"/>
+            </a>
+        </div>
+    </nav>
 
     <main id="main-content">
         <div v-if="isLoading" class="loading-container">
@@ -93,11 +181,154 @@ const reloadPage = () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 100;
 }
 .header img{
     width: auto;
     max-height: 60px;
 }
+
+/* Hamburger Button */
+.hamburger-button {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 101;
+}
+
+.hamburger-line {
+    width: 25px;
+    height: 3px;
+    background-color: #fff;
+    transition: all 0.3s ease-in-out;
+    border-radius: 2px;
+}
+
+.hamburger-button:hover .hamburger-line {
+    background-color: #f08c0b;
+}
+
+.hamburger-line.open:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger-line.open:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-line.open:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background-color: #1a1f26;
+    transform: translateX(-280px);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mobile-menu.open {
+    transform: translateX(0);
+}
+
+.menu-header{
+    padding: 22px 24px;
+}
+
+.menu-header img{
+    max-width: 150px;
+}
+
+.close-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #fff;
+    font-size: 32px;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover {
+    color: #f08c0b;
+}
+
+.close-icon {
+    display: block;
+}
+
+.menu-body{
+    padding: 16px
+}
+
+.menu-body ul{
+    padding-left: 16px;
+}
+
+.menu-body ul li, .menu-body p{
+    font-size: 14px;
+}
+
+.menu-footer{
+    display: flex;
+    justify-content: space-between;
+    padding: 16px
+}
+
+.menu-footer img{
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
 .item-wrapper{
     height: 100%;
 }

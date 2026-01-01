@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mdi/js": "^7.4.47",
+    "@sentry/vue": "^10.32.1",
     "pexels": "^1.4.0",
     "vite-plugin-commonjs": "^0.10.3",
     "vue": "^3.4.37"

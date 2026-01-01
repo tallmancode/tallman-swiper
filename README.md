@@ -174,6 +174,16 @@ npm install
    - Sign up for a free account
    - Copy your API key from the dashboard
 
+3. For production, create `.env.production` (not committed) and include:
+   ```env
+   VITE_PEXEL_KEY=your_pexels_api_key_here
+   VITE_SENTRY_DSN=your_sentry_dsn_here
+   # Optional:
+   # VITE_SENTRY_ENV=production
+   # VITE_COMMIT_SHA=main@abc123
+   ```
+   Sentry initializes only in production builds (`import.meta.env.PROD`) when `VITE_SENTRY_DSN` is set; otherwise it stays disabled.
+
 ### Step 4: Start Development Server
 
 ```bash

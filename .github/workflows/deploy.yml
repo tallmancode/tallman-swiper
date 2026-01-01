@@ -18,6 +18,8 @@ jobs:
               run: npm run build
               env:
                   VITE_PEXEL_KEY: ${{ secrets.VITE_PEXEL_KEY }}
+                  VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+                  VITE_SENTRY_ENV: 'production'
             - name: Archive Production Artifacts
               run: tar -czvf build.tar.gz ./dist ./ecosystem.config.cjs
             - name: Setup SSH Agent

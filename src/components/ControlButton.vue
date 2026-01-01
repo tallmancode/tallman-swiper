@@ -3,7 +3,7 @@ defineProps<{icon: string, color: string, label: string}>()
 </script>
 
 <template>
-<button class="control-button" type="button" :style="{backgroundColor: color}" :aria-label="label">
+<button class="control-button" type="button" :style="{backgroundColor: color}" :aria-label="label" :title="label">
     <svg :viewBox="'0 0 24 24'" aria-hidden="true">
         <path :d="icon"></path>
     </svg>

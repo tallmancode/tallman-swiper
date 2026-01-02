@@ -13,13 +13,13 @@ const useSwiperCore = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperPro
 
     const rewind = (list: IPhoto[]) => {
         for (const item of list) {
-            swiperConfig.value.rewindKeys.push(item[swiperProps.keyName] + '')
+            swiperConfig.value.rewindKeys.push(item[swiperProps.keyName] as string + '')
         }
         queue.value = [...list, ...queue.value]
     }
 
     const submitDecide = (type: string, item: IPhoto) => {
-        onSubmit({type, key: item[swiperProps.keyName], item})
+        onSubmit({type, key: item[swiperProps.keyName] as string, item})
     }
     const decide = (type: string) => {
         if (swiperState.value.touchId || swiperState.value.status !== STATUS_CONSTANTS.NORMAL) {

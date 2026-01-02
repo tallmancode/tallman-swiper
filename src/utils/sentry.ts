@@ -20,7 +20,7 @@ const SENSITIVE_HEADERS = [
  * Scrubs sensitive data from Sentry events before transmission.
  * Removes PII, credentials, tokens, and other sensitive information.
  */
-function beforeSend(event: ErrorEvent, hint: EventHint): ErrorEvent | null {
+function beforeSend(event: ErrorEvent, _hint: EventHint): ErrorEvent | null {
     // Scrub sensitive headers from request data
     if (event.request?.headers) {
         const headers = event.request.headers

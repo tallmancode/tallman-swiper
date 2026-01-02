@@ -166,8 +166,8 @@ const onSubmit = (_params: {type?: string, key?: string | number, item?: IPhoto}
     if (queue.value.length < 3) {
         mock()
     }
-    const newKeys = queue.value.map(item => item[props.keyName])
-    const oldKeys = list.value.map(item => item[props.keyName])
+    const newKeys = queue.value.map(item => item[props.keyName] as string)
+    const oldKeys = list.value.map(item => item[props.keyName] as string)
     diff(newKeys, oldKeys)
 }
 
@@ -203,12 +203,12 @@ defineExpose({
                     <SwiperCard
                         v-if="index < max + 1"
                         :ready="index === max"
-                        :key="item[keyName]"
-                        :data-id="item[keyName]"
+                        :key="(item[keyName] as string)"
+                        :data-id="(item[keyName] as string)"
                         :index="index"
                         :swiperState="swiperState"
                         :ratio="ratio"
-                        :rewind="swiperConfig.rewindKeys.indexOf(item[keyName]) > -1 ? index : false"
+                        :rewind="swiperConfig.rewindKeys.indexOf(item[keyName] as string) > -1 ? index : false"
                         :tinder-mounted="isMounted"
                         :scale-step="scaleStep"
                         :offset-y="offsetY"

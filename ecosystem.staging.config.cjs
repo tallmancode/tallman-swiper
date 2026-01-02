@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'swiper',
+    name: 'swiper-staging',
     script: 'server-dist/index.js',
     cwd: process.env.APP_ROOT || '/www/wwwroot',
     env: {
@@ -16,3 +16,4 @@ module.exports = {
     max_memory_restart: '1G'
   }]
 }
+

@@ -23,7 +23,7 @@ const useSwiperQueue = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperPr
                 const item = queue.value[i]
                 if (item[keyName] && add[i] === item[keyName]) {
                     onceRewindCount++
-                    const id = item[keyName]
+                    const id = item[keyName] as string
                     const newSwiperKey = id + Math.random()
                     if (
                         swiperConfig.value.leavingKeys.indexOf(id) > -1 ||
@@ -45,15 +45,15 @@ const useSwiperQueue = (swiperConfig: Ref<ISwiperConfig>, swiperProps: ISwiperPr
         swiperConfig.value.onceRewindCount = onceRewindCount
         const remove = difference(old, list)
         if (remove.length) {
-            swiperConfig.value.leavingKeys.push(listItems.value[0][keyName])
+            swiperConfig.value.leavingKeys.push(listItems.value[0][keyName] as string)
             for (let i = (swiperProps?.max as number) + 1; i < (swiperProps?.max as number) + 1 + remove.length; i++) {
                 const item = listItems.value[i]
                 if (item) {
                     if (
-                        swiperConfig.value.leavingKeys.indexOf(item[keyName]) > -1 ||
-                        swiperConfig.value.hidingKeys.indexOf(item[keyName]) > -1
+                        swiperConfig.value.leavingKeys.indexOf(item[keyName] as string) > -1 ||
+                        swiperConfig.value.hidingKeys.indexOf(item[keyName] as string) > -1
                     ) {
-                        item.$vtKey = item[keyName] + Math.random()
+                        item.$vtKey = (item[keyName] as string) + Math.random()
                     }
                 }
             }

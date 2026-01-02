@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
+    "allowImportingTsExtensions": false,
     "outDir": "server-dist",
     "module": "NodeNext",
     "target": "ES2020",

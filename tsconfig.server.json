@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": false,
     "allowImportingTsExtensions": false,
+    "rootDir": "server",
     "outDir": "server-dist",
     "module": "NodeNext",
     "target": "ES2020",

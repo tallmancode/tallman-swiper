@@ -7,7 +7,7 @@ import { createClient } from "pexels";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import type { IPhoto } from "../src/types.js";
+import type { IPhoto } from "./types.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -4,11 +4,10 @@ dotenv.config();
 import express from "express";
 import type { Request, Response } from "express";
 import { createClient } from "pexels";
-import type { ErrorResponse } from "pexels/dist/types";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import type { IPhoto } from "../src/types";
+import type { IPhoto } from "../src/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,7 +48,7 @@ app.get("/api/photos", async (_req: Request, res: Response) => {
       return;
     }
 
-    const error = (result as ErrorResponse).error ?? "Unknown Pexels error";
+    const error = (result as { error?: string }).error ?? "Unknown Pexels error";
     res.status(502).json({ error });
   } catch (err) {
     console.error("Pexels request failed", err);

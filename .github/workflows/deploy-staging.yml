@@ -71,11 +71,11 @@ jobs:
                     
                     # Create .env file with environment variables
                     echo 'Creating .env file...'
-                    cat > .env << 'ENVEOF'
-                    PEXELS_API_KEY=${{ secrets.PEXELS_API_KEY }}
-                    APP_ROOT=${{ secrets.STAGING_SERVER_PATH }}
-                    APP_PORT=${{ secrets.STAGING_APP_PORT }}
-                    ENVEOF
+                    {
+                      echo 'PEXELS_API_KEY=${{ secrets.PEXELS_API_KEY }}'
+                      echo 'APP_ROOT=${{ secrets.STAGING_SERVER_PATH }}'
+                      echo 'APP_PORT=${{ secrets.STAGING_APP_PORT }}'
+                    } > .env
                     chmod 600 .env
                     echo '.env file created with secure permissions'
                     

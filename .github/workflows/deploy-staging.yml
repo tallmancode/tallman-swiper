@@ -1,7 +1,5 @@
-name: Deploy Release
+name: Deploy to Staging
 on:
-    release:
-        types: [published]
     workflow_dispatch:
 jobs:
     build-and-deploy:
@@ -20,21 +18,21 @@ jobs:
                   npm run build:server
               env:
                   VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-                  VITE_SENTRY_ENV: 'production'
-            - name: Archive Production Artifacts
-              run: tar -czvf build.tar.gz ./dist ./server-dist ./ecosystem.config.cjs
+                  VITE_SENTRY_ENV: 'staging'
+            - name: Archive Staging Artifacts
+              run: tar -czvf build.tar.gz ./dist ./server-dist ./ecosystem.staging.config.cjs
             - name: Setup SSH Agent
               uses: webfactory/ssh-agent@v0.9.0
               with:
                   ssh-private-key: ${{ secrets.SSH_KEY }}
             - name: Transfer Build Artifacts
-              run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.SERVER_PATH }}/build.tar.gz
+              run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.STAGING_SERVER_PATH }}/build.tar.gz
             - name: Deploy to Server
               run: |
                   set -e
                   ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
                     set -e
-                    SERVER_PATH='${{ secrets.SERVER_PATH }}'
+                    SERVER_PATH='${{ secrets.STAGING_SERVER_PATH }}'
                     
                     # Verify server path exists
                     if [ ! -d \"\$SERVER_PATH\" ]; then
@@ -59,15 +57,15 @@ jobs:
                     
                     # Remove old dist folder and extract new build
                     echo 'Removing old dist folder...'
-                    rm -rf dist || true
+                    rm -rf dist server-dist || true
                     echo 'Extracting new build...'
                     tar -xzvf build.tar.gz
                     echo 'Cleaning up build archive...'
                     rm build.tar.gz
                     
-                    # Verify ecosystem.config.cjs exists
-                    if [ ! -f \"ecosystem.config.cjs\" ]; then
-                      echo 'Error: ecosystem.config.cjs not found after extraction'
+                    # Verify ecosystem.staging.config.cjs exists
+                    if [ ! -f \"ecosystem.staging.config.cjs\" ]; then
+                      echo 'Error: ecosystem.staging.config.cjs not found after extraction'
                       exit 1
                     fi
                     
@@ -75,22 +73,22 @@ jobs:
                     echo 'Creating .env file...'
                     cat > .env << EOF
 PEXELS_API_KEY=${{ secrets.PEXELS_API_KEY }}
-APP_ROOT=${{ secrets.SERVER_PATH }}
-APP_PORT=${{ secrets.APP_PORT }}
+APP_ROOT=${{ secrets.STAGING_SERVER_PATH }}
+APP_PORT=${{ secrets.STAGING_APP_PORT }}
 EOF
                     chmod 600 .env
                     echo '.env file created with secure permissions'
                     
                     # Stop existing PM2 process if running
                     echo 'Stopping existing PM2 process...'
-                    pm2 stop swiper || true
+                    pm2 stop swiper-staging || true
                     
                     # Start or reload PM2 process
                     echo 'Starting/Reloading PM2 process...'
-                    if pm2 list | grep -q swiper; then
-                      pm2 reload ecosystem.config.cjs --update-env
+                    if pm2 list | grep -q swiper-staging; then
+                      pm2 reload ecosystem.staging.config.cjs --update-env
                     else
-                      pm2 start ecosystem.config.cjs
+                      pm2 start ecosystem.staging.config.cjs
                     fi
                     
                     # Save PM2 configuration
@@ -102,12 +100,13 @@ EOF
                     
                     # Health check
                     echo 'Performing health check...'
-                    if curl -f http://localhost:${{ secrets.APP_PORT }} > /dev/null 2>&1; then
+                    if curl -f http://localhost:${{ secrets.STAGING_APP_PORT }} > /dev/null 2>&1; then
                       echo 'Health check passed: App is responding'
                     else
                       echo 'Health check failed: App is not responding'
                       exit 1
                     fi
                     
-                    echo 'Deployment completed successfully!'
+                    echo 'Staging deployment completed successfully!'
                   "
+

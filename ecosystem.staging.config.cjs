@@ -3,7 +3,7 @@ require('dotenv').config();
 module.exports = {
   apps: [{
     name: 'swiper-staging',
-    script: 'server-dist/index.js',
+    script: 'server-dist/server/index.js',
     cwd: process.env.APP_ROOT || '/www/wwwroot',
     env: {
       NODE_ENV: 'production',

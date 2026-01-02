@@ -22,7 +22,7 @@ jobs:
                   VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
                   VITE_SENTRY_ENV: 'production'
             - name: Archive Production Artifacts
-              run: tar -czvf build.tar.gz ./dist ./server-dist ./ecosystem.config.cjs
+              run: tar -czvf build.tar.gz ./dist ./server-dist ./ecosystem.config.cjs ./package.json ./package-lock.json
             - name: Setup SSH Agent
               uses: webfactory/ssh-agent@v0.9.0
               with:
@@ -59,11 +59,15 @@ jobs:
                     
                     # Remove old dist folder and extract new build
                     echo 'Removing old dist folder...'
-                    rm -rf dist || true
+                    rm -rf dist server-dist || true
                     echo 'Extracting new build...'
                     tar -xzvf build.tar.gz
                     echo 'Cleaning up build archive...'
                     rm build.tar.gz
+                    
+                    # Install production dependencies
+                    echo 'Installing production dependencies...'
+                    npm ci --omit=dev
                     
                     # Verify ecosystem.config.cjs exists
                     if [ ! -f \"ecosystem.config.cjs\" ]; then

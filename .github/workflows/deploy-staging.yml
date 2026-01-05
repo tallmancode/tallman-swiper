@@ -10,8 +10,9 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: '22.19'
+                  cache: 'npm'
             - name: Install Dependencies
-              run: npm install
+              run: npm ci
             - name: Build
               run: |
                   npm run build
@@ -20,7 +21,7 @@ jobs:
                   VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
                   VITE_SENTRY_ENV: 'staging'
             - name: Archive Staging Artifacts
-              run: tar -czvf build.tar.gz ./dist ./server-dist ./ecosystem.staging.config.cjs ./package.json ./package-lock.json
+              run: tar -czvf build.tar.gz ./dist ./server-dist ./package.json ./package-lock.json
             - name: Setup SSH Agent
               uses: webfactory/ssh-agent@v0.9.0
               with:

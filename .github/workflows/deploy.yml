@@ -30,11 +30,11 @@ jobs:
               with:
                   ssh-private-key: ${{ secrets.SSH_KEY }}
             - name: Transfer Build Artifacts
-              run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.SERVER_PATH }}/build.tar.gz
+              run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -P ${{ secrets.SSH_PORT }} build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.SERVER_PATH }}/build.tar.gz
             - name: Deploy to Server
               run: |
                   set -e
-                  ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
+                  ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -p ${{ secrets.SSH_PORT }}  ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
                     set -e
                     SERVER_PATH='${{ secrets.SERVER_PATH }}'
                     

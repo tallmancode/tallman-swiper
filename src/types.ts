@@ -3,6 +3,7 @@ export interface IPhoto {
     src: string,
     credits: { name: string, link: string }
     $vtKey?: string
+    [key: string]: string | { name: string, link: string } | undefined
 }
 
 export interface ISwiperSize {

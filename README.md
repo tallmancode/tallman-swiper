@@ -166,7 +166,12 @@ npm install
 
 2. Open `.env` and add your Pexels API key:
    ```env
-   VITE_PEXEL_KEY=your_pexels_api_key_here
+   PEXELS_API_KEY=your_pexels_api_key_here
+   # Optional: override server port (defaults to 5173)
+   # PORT=5173
+   # Optional: front-end sentry configuration
+   # VITE_SENTRY_DSN=your_sentry_dsn_here
+   # VITE_SENTRY_ENV=development
    ```
 
    To get a Pexels API key:
@@ -174,37 +179,36 @@ npm install
    - Sign up for a free account
    - Copy your API key from the dashboard
 
-3. For production, create `.env.production` (not committed) and include:
-   ```env
-   VITE_PEXEL_KEY=your_pexels_api_key_here
-   VITE_SENTRY_DSN=your_sentry_dsn_here
-   # Optional:
-   # VITE_SENTRY_ENV=production
-   # VITE_COMMIT_SHA=main@abc123
-   ```
-   Sentry initializes only in production builds (`import.meta.env.PROD`) when `VITE_SENTRY_DSN` is set; otherwise it stays disabled.
-
 ### Step 4: Start Development Server
 
 ```bash
-npm run dev
+npm run dev:server
 ```
 
-The application will be available at `http://localhost:5173` (or the port shown in the terminal).
+This runs a single Express server that proxies `/api/photos` and mounts Vite middleware for HMR. The application will be available at `http://localhost:5173` (or the port shown in the terminal).
 
 ### Build for Production
 
 ```bash
 npm run build
+npm run build:server
 ```
 
-The production build will be output to the `dist` directory.
+Then start the production server (serves `dist/` and the `/api/photos` proxy):
+
+```bash
+# PowerShell
+$env:NODE_ENV="production"; npm start
+# bash
+NODE_ENV=production npm start
+```
 
 ### Preview Production Build
 
 ```bash
 npm run preview
 ```
+Note: `npm run preview` serves only the built front-end bundle; use `npm start` after building to exercise the API route.
 
 ---
 

@@ -35,22 +35,89 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Tallman Swiper",
-      "description": "A premium Vue 3 card swiper component inspired by Tinder.",
-      "url": "https://swiper.tallmancode.co.za/",
-      "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "All",
-      "author": {
-        "@type": "Person",
-        "name": "Steve Stewart",
-        "url": "https://tallmancode.co.za"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Tallman Swiper",
+          "applicationCategory": "DeveloperApplication",
+          "description": "Modern Vue 3 & TypeScript Card Swiper Component - A touch-enabled, customizable card swiping interface for web applications",
+          "operatingSystem": "Web Browser",
+          "url": "https://swiper.tallmancode.co.za/",
+          "programmingLanguage": [
+            "TypeScript",
+            "JavaScript",
+            "Vue"
+          ],
+          "softwareVersion": "1.0.0",
+          "author": {
+            "@type": "Person",
+            "name": "Steve Stewart",
+            "alternateName": "TallmanCode",
+            "url": "https://tallmancode.co.za",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Johannesburg",
+              "addressCountry": "ZA"
+            },
+            "sameAs": [
+              "https://www.linkedin.com/in/stevestewart84/",
+              "https://github.com/tallmancode"
+            ]
+          },
+          "funding": {
+            "@type": "MonetaryGrant",
+            "name": "Open for Sponsorship",
+            "description": "This project accepts seed funding and sponsorships to support ongoing development and maintenance"
+          },
+          "browserRequirements": "Requires JavaScript. Requires HTML5.",
+          "softwareRequirements": "Vue 3"
+        },
+        {
+          "@type": "WebPage",
+          "name": "Tallman Swiper - Modern Vue 3 & TypeScript Card Swiper Component",
+          "url": "https://swiper.tallmancode.co.za/",
+          "description": "Interactive demo and documentation for Tallman Swiper, a modern card swiping component built with Vue 3 and TypeScript",
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://swiper.tallmancode.co.za/og-image.jpg"
+          },
+          "publisher": {
+            "@type": "Person",
+            "name": "Steve Stewart",
+            "alternateName": "TallmanCode",
+            "url": "https://tallmancode.co.za",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Johannesburg",
+              "addressCountry": "ZA"
+            },
+            "sameAs": [
+              "https://www.linkedin.com/in/stevestewart84/",
+              "https://github.com/tallmancode"
+            ]
+          }
+        },
+        {
+          "@type": "WebSite",
+          "name": "Tallman Swiper",
+          "url": "https://swiper.tallmancode.co.za/",
+          "publisher": {
+            "@type": "Person",
+            "name": "Steve Stewart",
+            "alternateName": "tallmancode",
+            "url": "https://tallmancode.co.za",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Johannesburg",
+              "addressCountry": "ZA"
+            },
+            "sameAs": [
+              "https://www.linkedin.com/in/stevestewart84/",
+              "https://github.com/tallmancode"
+            ]
+          }
+        }
+      ]
     }
     </script>
 </head>

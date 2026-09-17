@@ -1,0 +1,36 @@
+---
+description: SEO best practices for a Vue 3 + Vite SPA
+globs: **/*.vue,**/router/**,**/pages/**,**/views/**
+alwaysApply: false
+---
+
+# SEO
+
+## Rendering strategy (the biggest lever)
+- A plain client-rendered Vite SPA is invisible or slow to index for many crawlers and produces poor Core Web Vitals (LCP/TTFB). If SEO genuinely matters for this app's public-facing pages, recommend Nuxt 3 (SSR/SSG) or `vite-ssg`/`vite-plugin-ssr` instead of pure CSR — mention this proactively when a page is clearly meant to be publicly indexed (marketing pages, blog, product pages).
+- If the project must stay a pure SPA, at minimum implement prerendering for key public routes (e.g. `vite-plugin-prerender` or a build-time static render step) rather than relying on client-side-only rendering.
+
+## Per-page metadata
+- Manage `<title>`, `<meta description>`, canonical URL, and Open Graph/Twitter card tags per route using `@unhead/vue` (or `@vueuse/head`), set inside each page/view component, not only in `index.html`.
+- Every page needs a unique, descriptive `<title>` and meta description — never leave every route with the same static title from `index.html`.
+- Set `<link rel="canonical">` to avoid duplicate-content issues, especially with query-param-driven views.
+- Include `og:title`, `og:description`, `og:image`, `og:url`, and `twitter:card` for shareable pages.
+
+## Structure & content
+- Use one `<h1>` per page and a logical, sequential heading hierarchy (`h1` → `h2` → `h3`), not heading levels chosen for font size.
+- Use semantic HTML elements (`<nav>`, `<main>`, `<article>`, `<section>`, `<footer>`) instead of generic `<div>`s for structural content.
+- Every meaningful `<img>` needs a descriptive `alt`; decorative images should have `alt=""`.
+- Internal links should use real `<a href>`/`<router-link to>` elements (crawlable), not `@click` handlers on non-link elements, so crawlers can follow site structure.
+
+## Technical SEO
+- Provide a `robots.txt` and an XML sitemap (generated at build time for known routes; dynamically for content-driven routes) in `public/`.
+- Ensure routes return correct HTTP status codes when prerendered/SSR'd (404 page should actually respond 404, not 200).
+- Use `history` mode in Vue Router for clean URLs where the server is configured to support it (fallback to `index.html`), since hash-mode (`/#/path`) URLs are not SEO-friendly.
+- Avoid infinite-scroll-only content for anything that should be indexable; provide paginated URLs as an alternative crawl path.
+
+## Performance-as-SEO
+- Core Web Vitals (LCP, CLS, INP) factor into ranking — apply the performance rules (lazy loading, image optimization, avoiding layout shift) for any public-facing page.
+- Avoid render-blocking third-party scripts on public pages; load analytics/marketing scripts `async`/`defer` or after interaction.
+
+## Structured data
+- Add JSON-LD structured data (`Organization`, `Article`, `Product`, `BreadcrumbList`, etc. as relevant) for pages that benefit from rich search results, injected via `@unhead/vue`'s `script` support.

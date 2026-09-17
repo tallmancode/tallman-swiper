@@ -1,0 +1,52 @@
+---
+description: Core conventions for this Vue 3 + Vite project
+globs:
+alwaysApply: true
+---
+
+# Vue 3 + Vite — General Conventions
+
+## Stack assumptions
+- Vue 3 with `<script setup>` and the Composition API only. Do not write Options API code.
+- Vite as the build tool. Prefer Vite-native features (env vars, glob imports, `import.meta`) over webpack-era patterns.
+- TypeScript by default. If a file is `.js`, still add JSDoc types where practical.
+- Pinia for state management. Do not suggest Vuex.
+- Vue Router for routing, using route-based code splitting.
+
+## Component structure
+- One component per file, `PascalCase.vue` filenames.
+- Order blocks as `<script setup>`, `<template>`, `<style scoped>`.
+- Keep components small and focused; extract reusable logic into composables under `src/composables/` named `useXxx.ts`.
+- Props: define with `defineProps<{ ... }>()` and TypeScript interfaces, not runtime prop objects, unless runtime validation is explicitly needed.
+- Emits: always declare with `defineEmits<{ ... }>()`.
+- Avoid prop drilling more than 2 levels deep — use provide/inject or a store instead.
+
+## Reactivity
+- Prefer `ref` for primitives, `reactive` for object groups that are always used together.
+- Use `computed` for derived state instead of methods called from the template.
+- Use `shallowRef`/`shallowReactive` for large or deeply nested objects that don't need deep reactivity (e.g. large lists, third-party class instances).
+- Never mutate props directly; emit events or use `v-model` with `defineModel()`.
+
+## Project structure (suggest this layout when scaffolding)
+```
+src/
+  assets/
+  components/
+  composables/
+  layouts/
+  pages/ or views/
+  router/
+  stores/
+  services/ (API clients)
+  utils/
+  types/
+```
+
+## Linting & formatting
+- Assume ESLint with `eslint-plugin-vue` (recommended or strict ruleset) and Prettier are configured.
+- Do not disable lint rules inline unless there's no reasonable alternative, and always comment why.
+
+## When generating code
+- Always consider performance, security, SEO and accessibility rules in the other project rule files before finalizing code — apply them by default, not only when asked.
+- Prefer editing/extending existing composables, stores, and utils over duplicating logic.
+- Flag (in comments or chat) any place where a suggested pattern trades off performance, security, or SEO, and explain the tradeoff briefly.

@@ -15,6 +15,7 @@
 - [Technology Stack](#-technology-stack)
 - [Key Technical Highlights](#-key-technical-highlights)
 - [Installation & Setup](#-installation--setup)
+- [Docker and deploy](#docker-and-deploy)
 - [Usage](#-usage)
 - [Project Structure](#-project-structure)
 - [Development Details](#-development-details)
@@ -140,21 +141,21 @@ The codebase follows a modular, composable architecture pattern:
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** (version 18.0 or higher recommended)
-- **npm** (version 9.0 or higher) or **yarn** (version 1.22 or higher)
+- **Node.js** 22+ (see `.nvmrc`)
+- **npm** 10+ (comes with Node 22)
 - A **Pexels API key** (free at [pexels.com/api](https://www.pexels.com/api/))
 
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/tallman-swiper.git
+git clone https://github.com/tallmancode/tallman-swiper.git
 cd tallman-swiper
 ```
 
 ### Step 2: Install Dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Step 3: Configure Environment Variables
@@ -209,6 +210,65 @@ NODE_ENV=production npm start
 npm run preview
 ```
 Note: `npm run preview` serves only the built front-end bundle; use `npm start` after building to exercise the API route.
+
+### Scripts
+
+| Script | Description |
+| ------ | ----------- |
+| `npm run dev:server` | Express + Vite middleware (local HMR) |
+| `npm run build` | Typecheck + Vite production build |
+| `npm run build:server` | Compile Express to `server-dist/` |
+| `npm start` | Run production server (`NODE_ENV=production`) |
+| `npm run typecheck` | Vue + server TypeScript checks |
+| `npm run audit:ci` | Dependency audit (high+) |
+| `npm run checks` | typecheck → build → build:server → audit:ci |
+
+---
+
+## Docker and deploy
+
+**Production domain:** [https://swiper.tallmancode.co.za](https://swiper.tallmancode.co.za)
+
+Production shape: one **Node** container (SPA + `/api/photos` + `/health`). Images are built on GitHub Actions and pushed to **GHCR**. aaPanel terminates TLS and reverse-proxies to Compose `HOST_PORT`.
+
+### Local Compose smoke
+
+1. Copy [`deploy/.env.example`](deploy/.env.example) to `.env` next to [`docker-compose.yml`](docker-compose.yml).
+2. Set `PEXELS_API_KEY`, `HOST_PORT`, and related values.
+3. Build and run:
+
+```powershell
+docker compose up --build
+```
+
+Open `http://localhost:<HOST_PORT>`.
+
+### Promotion and release
+
+```text
+develop → promote staging → promote main → cut release tag vX.Y.Z → deploy
+```
+
+| Workflow | Trigger | Role |
+| -------- | ------- | ---- |
+| CI | push/PR to `main`, `develop`, `staging` | Typecheck, build, audit |
+| Promote to staging | `workflow_dispatch` | Fast-forward `staging` ← `develop` |
+| Promote to main | `workflow_dispatch` | Fast-forward `main` ← `staging` |
+| Cut release | `workflow_dispatch` on `main` | Annotated tag `vX.Y.Z` + GitHub Release |
+| Deploy | push tags `v*` / dispatch | Build/push GHCR; SSH `docker compose pull && up -d` |
+
+`staging` is a quality gate only (no separate staging VPS).
+
+### GitHub Environments and secrets
+
+Configure Environments: `staging`, `production-promote`, `production`.
+
+Deploy secrets on environment `production`:
+
+- Required: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_SSH_FINGERPRINT`, `VPS_COMPOSE_DIR`
+- Optional: `VPS_PORT` (defaults to 22), `VITE_SENTRY_DSN`
+
+Keep `PEXELS_API_KEY` on the VPS `.env` (not in Actions). Full aaPanel checklist: **[docs/deploy-vps.md](docs/deploy-vps.md)**. Short summary: **[DEPLOYMENT.md](DEPLOYMENT.md)**.
 
 ---
 
@@ -326,7 +386,11 @@ tallman-swiper/
 │   └── style.css           # Global styles
 │
 ├── public/                 # Static assets
-├── .env.example           # Environment variables template
+├── server/                 # Express API + production static serving
+├── deploy/.env.example     # VPS Compose env template
+├── docker-compose.yml      # Production Compose (GHCR image)
+├── Dockerfile              # Multi-stage Node image
+├── .env.example           # Local environment variables template
 ├── index.html             # HTML template
 ├── package.json           # Project dependencies
 ├── tsconfig.json          # TypeScript configuration

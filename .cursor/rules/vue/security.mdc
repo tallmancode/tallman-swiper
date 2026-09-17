@@ -1,0 +1,38 @@
+---
+description: Security best practices for Vue 3 + Vite
+globs:
+alwaysApply: true
+---
+
+# Security
+
+## XSS prevention
+- Never use `v-html` with unsanitized user or third-party content. If `v-html` is unavoidable, sanitize with a library such as DOMPurify first, applied at the point of insertion.
+- Avoid `eval()`, `new Function()`, and dynamically constructing DOM via `innerHTML` outside of Vue's templating.
+- Be cautious binding user-controlled values into `href`, `src`, or `style` attributes — validate/allowlist protocols (block `javascript:` URLs).
+
+## Environment variables & secrets
+- Only variables prefixed `VITE_` are exposed to client code — never put API keys, secrets, or credentials meant to stay server-side in a `VITE_`-prefixed variable, since anything exposed this way ships in the client bundle and is publicly visible.
+- Secrets (API keys for paid services, DB credentials, signing keys) belong in a backend/serverless function, never in frontend code or `.env` files that get bundled.
+- Add `.env`, `.env.local`, and similar files to `.gitignore`; only commit `.env.example` with placeholder values.
+
+## API & data handling
+- Validate and sanitize all data received from APIs before rendering, even from "trusted" internal APIs.
+- Use HTTPS for all API calls; never hardcode `http://` endpoints for production.
+- Attach auth tokens via headers (e.g. `Authorization: Bearer`), not in URL query strings, to avoid leaking tokens in logs/browser history.
+- Set reasonable timeouts and handle errors from `fetch`/`axios` calls explicitly; don't let unhandled rejections leak stack traces to the UI.
+- Avoid storing sensitive tokens in `localStorage` when possible; prefer `httpOnly` cookies set by the backend. If `localStorage`/`sessionStorage` must be used, understand it's readable by any script on the page (XSS risk).
+
+## Dependencies
+- Prefer well-maintained, widely-used packages; check for recent security advisories before adding a new dependency for a small task.
+- Recommend running `npm audit` (or the project's package manager equivalent) periodically and keeping dependencies patched.
+- Pin dependency versions in `package.json` for reproducible, auditable builds where the project already does so.
+
+## Routing & access control
+- Enforce auth/route guards in `router.beforeEach`, but treat this as UX only — always re-check authorization server-side, since client-side route guards can be bypassed.
+- Don't rely on hiding UI elements (`v-if="isAdmin"`) as a security boundary; the underlying API must independently enforce permissions.
+
+## Headers & config
+- Recommend a Content-Security-Policy (CSP) at the hosting/CDN level restricting script/style/img sources; avoid `unsafe-inline`/`unsafe-eval` where feasible.
+- Recommend setting `X-Content-Type-Options: nosniff`, `X-Frame-Options` (or `frame-ancestors` in CSP), and `Referrer-Policy` at the server/CDN layer.
+- If using `dangerouslySetInnerHTML`-equivalents or third-party embeds/iframes, use `sandbox` attributes and restrict permissions.

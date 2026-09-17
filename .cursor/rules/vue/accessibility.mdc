@@ -1,0 +1,15 @@
+---
+description: Accessibility (a11y) best practices for Vue 3 components
+globs: **/*.vue
+alwaysApply: false
+---
+
+# Accessibility
+
+- Use semantic elements (`<button>`, `<a>`, `<label>`, `<nav>`) instead of `<div>`/`<span>` with click handlers; if a non-native element must act as a control, add the correct `role`, `tabindex="0"`, and keyboard handlers (Enter/Space).
+- Every form input needs an associated `<label>` (via `for`/`id` or wrapping), not just a placeholder.
+- Manage focus explicitly for modals, drawers, and route changes: trap focus in open modals, return focus to the trigger on close, and move focus to the main heading (or reset scroll) on route navigation.
+- Ensure interactive elements are reachable and operable via keyboard alone (`Tab`, `Enter`, `Escape`); test any custom dropdown/combobox/carousel this way.
+- Use `aria-*` attributes to supplement semantics, not replace them (e.g. `aria-live="polite"` for toast notifications/async status updates, `aria-expanded` on disclosure toggles).
+- Maintain sufficient color contrast (WCAG AA: 4.5:1 for normal text) and never convey information (errors, required fields) by color alone.
+- Respect `prefers-reduced-motion` for non-essential animations/transitions.

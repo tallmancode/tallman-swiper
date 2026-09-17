@@ -25,7 +25,7 @@
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
     "pexels": "^1.4.0",
-    "vite-plugin-commonjs": "^0.10.3",
+    "vite-plugin-commonjs": "^0.10.4",
     "vue": "^3.4.37"
   },
   "devDependencies": {

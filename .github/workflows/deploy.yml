@@ -80,6 +80,7 @@ jobs:
           file: Dockerfile
           push: true
           build-args: |
+            HOST_PORT=${{ secrets.HOST_PORT }}
             VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
             VITE_SENTRY_ENV=production
           tags: |

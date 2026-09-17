@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22.14.0-alpine3.21 AS builder
+FROM node:25.2.1-alpine3.21 AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY server ./server
 
 RUN npm run build && npm run build:server
 
-FROM node:22.14.0-alpine3.21 AS runtime
+FROM node:25.2.1-alpine3.21 AS runtime
 
 WORKDIR /app
 

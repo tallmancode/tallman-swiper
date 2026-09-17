@@ -20,7 +20,7 @@ Full one-time VPS + GitHub setup: **[docs/deploy-vps.md](docs/deploy-vps.md)**.
 
 ### Secrets (GitHub environment `production`)
 
-- Required: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_SSH_FINGERPRINT`, `VPS_COMPOSE_DIR`
+- Required: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_COMPOSE_DIR`
 - Optional: `VPS_PORT` (default 22), `VITE_SENTRY_DSN`
 
 `PEXELS_API_KEY` is set on the VPS in `.env` next to `docker-compose.yml` (see [`deploy/.env.example`](deploy/.env.example)).

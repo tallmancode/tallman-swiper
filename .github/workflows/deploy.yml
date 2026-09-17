@@ -95,7 +95,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT != '' && secrets.VPS_PORT || 22 }}
-          fingerprint: ${{ secrets.VPS_SSH_FINGERPRINT }}
           envs: IMAGE_TAG,GHCR_OWNER,COMPOSE_DIR
           script: |
             set -euo pipefail

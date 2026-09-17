@@ -143,23 +143,11 @@ Add **required reviewers** on `staging`, `production-promote`, and `production`.
 | `VPS_HOST` | Yes | VPS IP or hostname |
 | `VPS_USER` | Yes | SSH user that can run Docker |
 | `VPS_SSH_KEY` | Yes | Private key PEM |
-| `VPS_SSH_FINGERPRINT` | Yes | Host key fingerprint for appleboy SSH (see below) |
 | `VPS_PORT` | No | Defaults to `22` |
 | `VPS_COMPOSE_DIR` | Yes | Absolute path to Compose dir |
 | `VITE_SENTRY_DSN` | No | Baked into the SPA at image build time |
 
 `PEXELS_API_KEY` lives on the VPS `.env`, not in GitHub Actions.
-
-#### `VPS_SSH_FINGERPRINT`
-
-Pin the VPS SSH host key so Deploy fails closed on MITM. On a trusted machine that can reach the VPS:
-
-```bash
-ssh-keyscan -p 22 YOUR_VPS_HOST 2>/dev/null | ssh-keygen -lf -
-```
-
-Copy the SHA256 fingerprint (e.g. `SHA256:...`) into the `VPS_SSH_FINGERPRINT` environment secret. Re-run after host key rotation.
-
 
 ---
 

@@ -265,7 +265,7 @@ Configure Environments: `staging`, `production-promote`, `production`.
 
 Deploy secrets on environment `production`:
 
-- Required: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_SSH_FINGERPRINT`, `VPS_COMPOSE_DIR`
+- Required: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_COMPOSE_DIR`
 - Optional: `VPS_PORT` (defaults to 22), `VITE_SENTRY_DSN`
 
 Keep `PEXELS_API_KEY` on the VPS `.env` (not in Actions). Full aaPanel checklist: **[docs/deploy-vps.md](docs/deploy-vps.md)**. Short summary: **[DEPLOYMENT.md](DEPLOYMENT.md)**.

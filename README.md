@@ -183,10 +183,12 @@ npm ci
 ### Step 4: Start Development Server
 
 ```bash
-npm run dev:server
+npm run dev
 ```
 
-This runs a single Express server that proxies `/api/photos` and mounts Vite middleware for HMR. The application will be available at `http://localhost:5173` (or the port shown in the terminal).
+This runs a single Express server that serves `/api/photos` and mounts Vite middleware for HMR. The application will be available at `http://localhost:5173` (or the port shown in the terminal).
+
+> Note: `npm run dev:client` starts Vite alone (no API). Use `npm run dev` (or `npm run dev:server`) for local photo loading.
 
 ### Build for Production
 
@@ -215,7 +217,9 @@ Note: `npm run preview` serves only the built front-end bundle; use `npm start` 
 
 | Script | Description |
 | ------ | ----------- |
-| `npm run dev:server` | Express + Vite middleware (local HMR) |
+| `npm run dev` | Express + Vite middleware (local HMR + `/api/photos`) |
+| `npm run dev:server` | Alias for `npm run dev` |
+| `npm run dev:client` | Vite only (no API; photos will fail) |
 | `npm run build` | Typecheck + Vite production build |
 | `npm run build:server` | Compile Express to `server-dist/` |
 | `npm start` | Run production server (`NODE_ENV=production`) |

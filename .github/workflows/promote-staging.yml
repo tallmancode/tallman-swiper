@@ -1,0 +1,59 @@
+name: Promote to staging
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: promote-staging
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Require green CI for develop tip SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_BRANCH: develop
+        run: |
+          set -euo pipefail
+          git fetch origin "${SOURCE_BRANCH}"
+          SOURCE_SHA="$(git rev-parse "origin/${SOURCE_BRANCH}")"
+          echo "Checking CI for SHA ${SOURCE_SHA} (tip of ${SOURCE_BRANCH})"
+          CONCLUSION="$(gh run list \
+            --workflow CI \
+            --limit 50 \
+            --json conclusion,headSha,status \
+            --jq "[.[] | select(.headSha == \"${SOURCE_SHA}\" and .status == \"completed\" and .conclusion == \"success\")][0].conclusion // empty")"
+          if [ "${CONCLUSION}" != "success" ]; then
+            echo "Refusing promote: no successful CI run for ${SOURCE_SHA} (got '${CONCLUSION:-missing}')"
+            exit 1
+          fi
+
+      - name: Fast-forward staging from develop
+        env:
+          SOURCE_BRANCH: develop
+          TARGET_BRANCH: staging
+        run: |
+          set -euo pipefail
+          git fetch origin "${SOURCE_BRANCH}"
+          git fetch origin "${TARGET_BRANCH}" || true
+          if git rev-parse "origin/${TARGET_BRANCH}" >/dev/null 2>&1; then
+            git checkout -B "${TARGET_BRANCH}" "origin/${TARGET_BRANCH}"
+            git merge --ff-only "origin/${SOURCE_BRANCH}"
+          else
+            echo "Creating ${TARGET_BRANCH} from ${SOURCE_BRANCH}"
+            git checkout -B "${TARGET_BRANCH}" "origin/${SOURCE_BRANCH}"
+          fi
+          git push origin "HEAD:${TARGET_BRANCH}"

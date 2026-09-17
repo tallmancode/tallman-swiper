@@ -1,0 +1,56 @@
+services:
+  app:
+    image: ghcr.io/${GHCR_OWNER:-local}/tallman-swiper:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_SENTRY_ENV: ${VITE_SENTRY_ENV:-production}
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT:-3000}
+      PEXELS_API_KEY: ${PEXELS_API_KEY:?PEXELS_API_KEY is required}
+    ports:
+      - "127.0.0.1:${HOST_PORT:-8080}:${PORT:-3000}"
+    networks:
+      - swiper
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--spider",
+          "http://127.0.0.1:3000/health",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  swiper:
+    driver: bridge

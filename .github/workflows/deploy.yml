@@ -1,119 +1,119 @@
-name: Deploy Release
-on:
-    release:
-        types: [published]
-    workflow_dispatch:
-jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Set up Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '22.19'
-                  cache: 'npm'
+name: Deploy
 
-            - name: Install Dependencies
-              run: npm ci
-            - name: Build
-              run: |
-                  npm run build
-                  npm run build:server
-              env:
-                  VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-                  VITE_SENTRY_ENV: 'production'
-            - name: Archive Production Artifacts
-              run: tar -czvf build.tar.gz ./dist ./server-dist ./package.json ./package-lock.json
-            - name: Setup SSH Agent
-              uses: webfactory/ssh-agent@v0.9.0
-              with:
-                  ssh-private-key: ${{ secrets.SSH_KEY }}
-            - name: Transfer Build Artifacts
-              run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -P ${{ secrets.SSH_PORT }} build.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.SERVER_PATH }}/build.tar.gz
-            - name: Deploy to Server
-              run: |
-                  set -e
-                  ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -p ${{ secrets.SSH_PORT }}  ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
-                    set -e
-                    SERVER_PATH='${{ secrets.SERVER_PATH }}'
-                    
-                    # Verify server path exists
-                    if [ ! -d \"\$SERVER_PATH\" ]; then
-                      echo \"Error: Server path \$SERVER_PATH does not exist\"
-                      exit 1
-                    fi
-                    
-                    # Change to server path
-                    cd \"\$SERVER_PATH\" || { echo \"Error: Failed to change to \$SERVER_PATH\"; exit 1; }
-                    
-                    # Verify build.tar.gz was transferred
-                    if [ ! -f \"build.tar.gz\" ]; then
-                      echo \"Error: build.tar.gz not found in \$SERVER_PATH\"
-                      exit 1
-                    fi
-                    
-                    # Verify PM2 is installed
-                    if ! command -v pm2 &> /dev/null; then
-                      echo 'Error: PM2 is not installed'
-                      exit 1
-                    fi
-                    
-                    # Remove old dist folder and extract new build
-                    echo 'Removing old dist folder...'
-                    rm -rf dist server-dist || true
-                    echo 'Extracting new build...'
-                    tar -xzvf build.tar.gz
-                    echo 'Cleaning up build archive...'
-                    rm build.tar.gz
-                    
-                    # Install production dependencies
-                    echo 'Installing production dependencies...'
-                    npm ci --omit=dev
-                    
-                    # Verify ecosystem.config.cjs exists
-                    if [ ! -f \"ecosystem.config.cjs\" ]; then
-                      echo 'Error: ecosystem.config.cjs not found after extraction'
-                      exit 1
-                    fi
-                    
-                    # Create .env file with environment variables
-                    echo 'Creating .env file...'
-                    {
-                      echo 'PEXELS_API_KEY=${{ secrets.PEXELS_API_KEY }}'
-                      echo 'APP_ROOT=${{ secrets.SERVER_PATH }}'
-                      echo 'APP_PORT=${{ secrets.APP_PORT }}'
-                    } > .env
-                    chmod 600 .env
-                    echo '.env file created with secure permissions'
-                    
-                    # Stop existing PM2 process if running
-                    echo 'Stopping existing PM2 process...'
-                    pm2 stop swiper || true
-                    
-                    # Start or reload PM2 process
-                    echo 'Starting/Reloading PM2 process...'
-                    if pm2 list | grep -q swiper; then
-                      pm2 reload ecosystem.config.cjs --update-env
-                    else
-                      pm2 start ecosystem.config.cjs
-                    fi
-                    
-                    # Save PM2 configuration
-                    pm2 save
-                    
-                    # Wait for app to start
-                    echo 'Waiting for app to start...'
-                    sleep 5
-                    
-                    # Health check
-                    echo 'Performing health check...'
-                    if curl -f http://localhost:${{ secrets.APP_PORT }} > /dev/null 2>&1; then
-                      echo 'Health check passed: App is responding'
-                    else
-                      echo 'Health check failed: App is not responding'
-                      exit 1
-                    fi
-                    
-                    echo 'Deployment completed successfully!'
-                  "
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to deploy (vX.Y.Z)"
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Resolve tag
+        id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_REF: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            RAW_TAG="${INPUT_TAG}"
+          else
+            RAW_TAG="${PUSH_REF}"
+          fi
+          if ! echo "${RAW_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Refusing deploy: tag '${RAW_TAG}' is not vX.Y.Z"
+            exit 1
+          fi
+          echo "tag=${RAW_TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+          persist-credentials: false
+
+      - name: Set image metadata
+        id: meta
+        env:
+          RAW_TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+          OWNER="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          {
+            echo "tag=${RAW_TAG}"
+            echo "owner=${OWNER}"
+            echo "image=ghcr.io/${OWNER}/tallman-swiper"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          build-args: |
+            VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
+            VITE_SENTRY_ENV=production
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image }}:latest
+          cache-from: type=gha,scope=tallman-swiper
+          cache-to: type=gha,mode=max,scope=tallman-swiper
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@8faa84277b88b6cd1455986f459aa66cf72bc8a3 # v1.2.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT != '' && secrets.VPS_PORT || 22 }}
+          fingerprint: ${{ secrets.VPS_SSH_FINGERPRINT }}
+          envs: IMAGE_TAG,GHCR_OWNER,COMPOSE_DIR
+          script: |
+            set -euo pipefail
+            cd "${COMPOSE_DIR}"
+            DEPLOY_IMAGE_TAG="${IMAGE_TAG}"
+            DEPLOY_GHCR_OWNER="${GHCR_OWNER}"
+            if [ -f .env ]; then
+              set -a
+              # shellcheck disable=SC1091
+              . ./.env
+              set +a
+            fi
+            export IMAGE_TAG="${DEPLOY_IMAGE_TAG}"
+            export GHCR_OWNER="${DEPLOY_GHCR_OWNER}"
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f
+        env:
+          IMAGE_TAG: ${{ steps.meta.outputs.tag }}
+          GHCR_OWNER: ${{ steps.meta.outputs.owner }}
+          COMPOSE_DIR: ${{ secrets.VPS_COMPOSE_DIR }}

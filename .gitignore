@@ -24,5 +24,20 @@ server-dist
 *.sln
 *.sw?
 
+# Env (keep examples)
 .env
+.env.*
+!.env.example
+!deploy/.env.example
+
+# Cursor local artifacts (keep rules/skills)
+.cursor/plans/
+
+# Editor / OS / tooling
+*.code-workspace
+Thumbs.db
+*.tsbuildinfo
+coverage
+.cache
+
 /security-review.md

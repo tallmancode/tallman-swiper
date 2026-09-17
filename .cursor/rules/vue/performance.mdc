@@ -1,0 +1,42 @@
+---
+description: Performance best practices for Vue 3 + Vite
+globs: **/*.vue,**/*.ts,**/*.tsx,**/*.js,**/*.jsx
+alwaysApply: false
+---
+
+# Performance
+
+## Code splitting & lazy loading
+- Lazy-load route components: `component: () => import('@/pages/Foo.vue')` in the router, never static imports for route-level components.
+- Use `defineAsyncComponent()` for heavy, below-the-fold, or rarely-used components (modals, charts, editors).
+- Group related async chunks with Vite's `import()` magic comments (`/* webpackChunkName */` is not needed; use `?url` or manual chunk config in `vite.config.ts` `build.rollupOptions.output.manualChunks` for vendor splitting when bundle analysis shows a need).
+
+## Rendering
+- Always provide a stable, unique `:key` in `v-for` — never the array index unless the list is static and never reordered/filtered.
+- Avoid `v-if` and `v-for` on the same element; filter the list in a `computed` instead.
+- Use `v-show` instead of `v-if` for elements that toggle frequently; use `v-if` for elements that rarely change or are expensive to render.
+- Use `v-memo` for large lists where only a few items re-render (e.g. virtualized lists, large tables).
+- Virtualize long lists (100+ items) with a library such as `@tanstack/vue-virtual` instead of rendering every row.
+- Avoid inline object/array/function literals in templates (e.g. `:style="{ color: 'red' }"` or `@click="() => doThing(x)"`) when they cause unnecessary re-renders in hot paths — hoist them to `computed` or top-level functions.
+
+## Reactivity cost
+- Don't put large, rarely-changing data in deeply `reactive()` objects; use `shallowRef`/`shallowReactive` or `Object.freeze()` for static data.
+- Avoid unnecessary `watch`/`watchEffect`; prefer `computed` when the goal is a derived value, not a side effect.
+- Clean up watchers, intervals, and event listeners in `onUnmounted` (or rely on `watch`'s automatic disposal when scoped to the component).
+
+## Assets
+- Use Vite's asset pipeline (`import img from './img.png'`) so images are hashed/optimized, rather than referencing `/public` paths for anything that benefits from bundling.
+- Serve responsive images: `srcset`/`sizes`, or a component wrapper, and prefer modern formats (WebP/AVIF) with fallbacks.
+- Set `loading="lazy"` and explicit `width`/`height` on below-the-fold `<img>` tags to prevent layout shift.
+- Import only the icons/functions you need from icon and utility libraries (e.g. `import { debounce } from 'lodash-es'`, never the full `lodash`).
+
+## Build & bundle
+- Keep dependencies lean; check bundle impact before adding a heavy library for a small feature.
+- Use `vite-plugin-inspect` or `rollup-plugin-visualizer` to audit bundle size when a change is suspected of bloating it.
+- Enable `build.cssCodeSplit` (default on) and avoid global CSS imports in components that are lazy-loaded.
+- Prefer native browser APIs (`IntersectionObserver`, `structuredClone`, etc.) over polyfilled libraries when targeting modern browsers.
+
+## Network
+- Debounce/throttle expensive input-driven operations (search-as-you-type, resize/scroll handlers).
+- Cache API responses appropriately (in a store, or via a data-fetching library like TanStack Query/VueUse's `useFetch` with caching) to avoid redundant requests.
+- Use HTTP caching headers and CDN caching for static assets in deployment config, where applicable.

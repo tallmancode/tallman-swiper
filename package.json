@@ -7,7 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "tsx server/index.ts",
+    "dev:client": "vite",
     "dev:server": "tsx server/index.ts",
     "build": "vue-tsc && vite build",
     "build:server": "tsc -p tsconfig.server.json",

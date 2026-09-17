@@ -163,7 +163,7 @@ async function bootstrap() {
 
     app.use(vite.middlewares);
 
-    app.use("*", async (req, res, next) => {
+    app.use("/{*path}", async (req, res, next) => {
       try {
         const url = req.originalUrl;
         const indexHtml = await fs.readFile(
@@ -183,7 +183,7 @@ async function bootstrap() {
   } else {
     const distPath = path.resolve(__dirname, "../dist");
     app.use(express.static(distPath));
-    app.get("*", (_req, res) => {
+    app.get("/{*path}", (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

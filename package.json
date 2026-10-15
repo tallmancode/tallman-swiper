@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@mdi/js": "^7.4.47",
-    "@sentry/vue": "^10.74.0",
+    "@sentry/vue": "^11.7.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",

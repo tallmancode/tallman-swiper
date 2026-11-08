@@ -1,0 +1,9 @@
+# Tallman Swiper
+
+> Lightweight, touch-friendly swipe and carousel component by Tallman Code.
+
+## Key Links
+- [Live Demo & Playground](https://swiper.tallmancode.co.za/)
+- [GitHub Repository & Documentation](https://github.com/tallmancode/tallman-swiper)
+- [Tallman Code Main Website](https://tallmancode.co.za/)
+- [Tallman Code Main llms.txt](https://tallmancode.co.za/llms.txt)
